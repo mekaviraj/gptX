@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PromptFlow AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="w-full max-w-xl bg-white rounded shadow p-6 mt-10">
+        <h1 class="text-2xl font-bold mb-4 text-center">PromptFlow AI</h1>
+        <form method="post" action="/messages/send/" class="flex mb-4">
+            <input name="msg_name" class="flex-1 border rounded-l px-3 py-2" placeholder="Type your message..." required>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r">Send</button>
+        </form>
+        <div>
+            <h2 class="font-semibold mb-2">Messages:</h2>
+            <ul>
+                {% for msg in messages.values() %}
+                    <li class="mb-2 border-b py-1">
+                        <div><b>User:</b> {{ msg.msg_name }}</div>
+                        <div class="text-blue-700"><b>AI:</b> {{ msg.ai_response }}</div>
+                    </li>
+                {% else %}
+                    <li class="text-gray-400">No messages yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
