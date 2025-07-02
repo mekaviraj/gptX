@@ -3,4 +3,4 @@ uvicorn
 httpx
 jinja2
 python-multipart
-openai
+google-generativeai
