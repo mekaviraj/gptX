@@ -3,94 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat Clone</title>
+    <title>Gemini Prompt Engineer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar for chat area */
+        textarea {
+            resize: none;
+            overflow-y: hidden;
+        }
         .chat-area::-webkit-scrollbar {
             width: 8px;
         }
         .chat-area::-webkit-scrollbar-track {
-            background: #f1f7ed; /* Light background */
+            background: #f1f7ed;
         }
         .chat-area::-webkit-scrollbar-thumb {
-            background: #243e36; /* Main color */
+            background: #243e36;
             border-radius: 4px;
-        }
-        .chat-area::-webkit-scrollbar-thumb:hover {
-            background: #1a2f26; /* Darker on hover */
-        }
-
-        /* Adjust textarea height dynamically */
-        textarea {
-            resize: none;
-            overflow-y: hidden; /* Hide scrollbar initially */
         }
     </style>
 </head>
 <body class="bg-[#f1f7ed] flex items-center justify-center min-h-screen font-sans">
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl flex flex-col h-[90vh]">
         <div id="chat-area" class="flex-grow overflow-y-auto p-4 space-y-4 chat-area rounded-lg bg-gray-50 mb-4">
-            <div class="flex justify-start">
-                <div class="bg-[#e0f2f7] text-[#243e36] p-3 rounded-lg max-w-[75%] shadow-sm">
-                    Hello! How can I assist you today?
-                </div>
-            </div>
+            <!-- Chat history will load here -->
         </div>
 
         <div class="border-t border-gray-200 pt-4 relative">
             <div id="expanded-fields" class="hidden grid grid-cols-2 gap-4 mb-4 bg-gray-50 p-4 rounded-lg">
                 <div>
                     <label for="topic" class="block text-sm font-medium text-gray-700">Topic / Subject</label>
-                    <input type="text" id="topic" name="topic" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="topic" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="context" class="block text-sm font-medium text-gray-700">Context / Examples</label>
-                    <textarea id="context" name="context" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]"></textarea>
+                    <textarea id="context" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
                 </div>
                 <div>
                     <label for="tone" class="block text-sm font-medium text-gray-700">Tone / Style</label>
-                    <input type="text" id="tone" name="tone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="tone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="targetAudience" class="block text-sm font-medium text-gray-700">Target Audience</label>
-                    <input type="text" id="targetAudience" name="targetAudience" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="targetAudience" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="format" class="block text-sm font-medium text-gray-700">Format</label>
-                    <input type="text" id="format" name="format" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="format" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                    <input type="text" id="role" name="role" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="role" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="keywords" class="block text-sm font-medium text-gray-700">Keywords</label>
-                    <input type="text" id="keywords" name="keywords" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="keywords" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="positiveKeywords" class="block text-sm font-medium text-gray-700">Positive / Key Words</label>
-                    <input type="text" id="positiveKeywords" name="positiveKeywords" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="positiveKeywords" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="negativeConstraints" class="block text-sm font-medium text-gray-700">Negative / Constraints</label>
-                    <input type="text" id="negativeConstraints" name="negativeConstraints" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="negativeConstraints" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
                 <div>
                     <label for="length" class="block text-sm font-medium text-gray-700">Length</label>
-                    <input type="text" id="length" name="length" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-[#243e36] focus:border-[#243e36]">
+                    <input type="text" id="length" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                 </div>
             </div>
 
             <div class="flex items-end space-x-2">
-                <button id="toggle-fields-btn" class="p-3 bg-[#7ca982] text-white rounded-full hover:bg-[#6a916e] focus:outline-none focus:ring-2 focus:ring-[#7ca982] focus:ring-offset-2 transition duration-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button id="toggle-fields-btn" class="p-3 bg-[#7ca982] text-white rounded-full hover:bg-[#6a916e]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                 </button>
-                <textarea id="main-prompt" rows="1" placeholder="Type your message..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#243e36] focus:border-transparent bg-white text-gray-800"></textarea>
-                <button id="send-btn" class="p-3 bg-[#243e36] text-white rounded-full hover:bg-[#1a2f26] focus:outline-none focus:ring-2 focus:ring-[#243e36] focus:ring-offset-2 transition duration-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <textarea id="main-prompt" rows="1" placeholder="Type your message..." class="flex-grow p-3 border border-gray-300 rounded-lg"></textarea>
+                <button id="send-btn" class="p-3 bg-[#243e36] text-white rounded-full hover:bg-[#1a2f26]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                     </svg>
                 </button>
@@ -105,111 +95,120 @@
         const sendBtn = document.getElementById('send-btn');
         const chatArea = document.getElementById('chat-area');
 
-        // Function to adjust textarea height
+        // Auto-resize textarea
         function adjustTextareaHeight(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
         }
 
-        // Event listener for main prompt textarea input
         mainPromptTextarea.addEventListener('input', () => adjustTextareaHeight(mainPromptTextarea));
-
-        // Event listener for expanded fields textareas
         document.querySelectorAll('#expanded-fields textarea').forEach(textarea => {
             textarea.addEventListener('input', () => adjustTextareaHeight(textarea));
         });
 
+        // Toggle expanded fields
         toggleFieldsBtn.addEventListener('click', () => {
             expandedFieldsDiv.classList.toggle('hidden');
-            // Change plus icon to minus and vice versa
             const iconPath = toggleFieldsBtn.querySelector('path');
-            if (expandedFieldsDiv.classList.contains('hidden')) {
-                iconPath.setAttribute('d', 'M12 6v6m0 0v6m0-6h6m-6 0H6'); // Plus icon
-            } else {
-                iconPath.setAttribute('d', 'M20 12H4'); // Minus icon
+            iconPath.setAttribute('d', expandedFieldsDiv.classList.contains('hidden') ? 
+                'M12 6v6m0 0v6m0-6h6m-6 0H6' : 'M20 12H4');
+        });
+
+        // Send message
+        async function sendMessage() {
+            const mainPrompt = mainPromptTextarea.value.trim();
+            const expandedFields = {
+                topic: document.getElementById('topic').value.trim(),
+                context: document.getElementById('context').value.trim(),
+                tone: document.getElementById('tone').value.trim(),
+                targetAudience: document.getElementById('targetAudience').value.trim(),
+                format: document.getElementById('format').value.trim(),
+                role: document.getElementById('role').value.trim(),
+                keywords: document.getElementById('keywords').value.trim(),
+                positiveKeywords: document.getElementById('positiveKeywords').value.trim(),
+                negativeConstraints: document.getElementById('negativeConstraints').value.trim(),
+                length: document.getElementById('length').value.trim()
+            };
+
+            if (!mainPrompt && Object.values(expandedFields).every(v => !v)) {
+                alert('Please enter a prompt or fill in some fields.');
+                return;
+            }
+
+            // Construct display message
+            let userMessage = mainPrompt;
+            const fieldLabels = {
+                topic: "Topic", context: "Context", tone: "Tone",
+                targetAudience: "Audience", format: "Format", role: "Role",
+                keywords: "Keywords", positiveKeywords: "Positive Words",
+                negativeConstraints: "Constraints", length: "Length"
+            };
+
+            const fieldDetails = Object.entries(expandedFields)
+                .filter(([_, val]) => val)
+                .map(([key, val]) => `${fieldLabels[key]}: ${val}`)
+                .join('\n');
+
+            if (fieldDetails) {
+                userMessage += (mainPrompt ? '\n\n' : '') + fieldDetails;
+            }
+
+            addMessageToChat(userMessage || '[Using expanded fields]', 'user');
+
+            // Clear inputs
+            mainPromptTextarea.value = '';
+            adjustTextareaHeight(mainPromptTextarea);
+            Object.keys(expandedFields).forEach(id => {
+                document.getElementById(id).value = '';
+            });
+
+            // Get bot response
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mainPrompt, expandedFields })
+                });
+                const data = await response.json();
+                addMessageToChat(data.response, 'bot');
+            } catch (error) {
+                addMessageToChat('Error: Failed to get response', 'bot');
+                console.error(error);
+            }
+        }
+
+        function addMessageToChat(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', type === 'user' ? 'justify-end' : 'justify-start');
+            messageDiv.innerHTML = `
+                <div class="${type === 'user' ? 'bg-[#7ca982] text-white' : 'bg-[#e0f2f7] text-[#243e36]'} p-3 rounded-lg max-w-[75%] whitespace-pre-wrap">
+                    ${message}
+                </div>
+            `;
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Load chat history on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/history');
+                const history = await response.json();
+                history.forEach(msg => {
+                    addMessageToChat(msg.content, msg.role);
+                });
+            } catch (error) {
+                console.error('Failed to load history:', error);
             }
         });
 
         sendBtn.addEventListener('click', sendMessage);
         mainPromptTextarea.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Prevent new line
+                e.preventDefault();
                 sendMessage();
             }
         });
-
-        function addMessageToChat(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('flex', type === 'user' ? 'justify-end' : 'justify-start');
-            messageDiv.innerHTML = `
-                <div class="${type === 'user' ? 'bg-[#7ca982] text-white' : 'bg-[#e0f2f7] text-[#243e36]'} p-3 rounded-lg max-w-[75%] shadow-sm whitespace-pre-wrap">
-                    ${message}
-                </div>
-            `;
-            chatArea.appendChild(messageDiv);
-            chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
-        }
-
-        async function sendMessage() {
-            const mainPrompt = mainPromptTextarea.value.trim();
-            const expandedFields = {};
-            document.querySelectorAll('#expanded-fields input, #expanded-fields textarea').forEach(field => {
-                if (field.value.trim()) {
-                    expandedFields[field.id] = field.value.trim();
-                }
-            });
-
-            if (!mainPrompt && Object.keys(expandedFields).length === 0) {
-                alert('Please enter a prompt or fill in some expanded fields.');
-                return;
-            }
-
-            addMessageToChat(mainPrompt || '[Using expanded fields]', 'user'); // Show user input, or a placeholder if only expanded fields
-
-            mainPromptTextarea.value = '';
-            adjustTextareaHeight(mainPromptTextarea); // Reset textarea height
-
-            // Clear expanded fields after sending
-            document.querySelectorAll('#expanded-fields input, #expanded-fields textarea').forEach(field => {
-                field.value = '';
-                adjustTextareaHeight(field); // Reset expanded field textarea heights
-            });
-
-
-            addMessageToChat('Thinking...', 'bot'); // Temporary loading message
-            const loadingMessage = chatArea.lastChild; // Get the loading message element
-
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ mainPrompt, expandedFields }),
-                });
-
-                const data = await response.json();
-
-                // Remove loading message
-                if (loadingMessage) {
-                    loadingMessage.remove();
-                }
-
-                if (response.ok) {
-                    addMessageToChat(data.response, 'bot');
-                } else {
-                    addMessageToChat(`Error: ${data.response || 'Something went wrong.'}`, 'bot');
-                }
-                
-
-            } catch (error) {
-                console.error('Error:', error);
-                if (loadingMessage) {
-                    loadingMessage.remove();
-                }
-                addMessageToChat('An error occurred while sending your message. Please check the console.', 'bot');
-            }
-        }
     </script>
 </body>
 </html>

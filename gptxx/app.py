@@ -1,30 +1,60 @@
 import os
-import textwrap
-import google.generativeai as genai
-from flask import Flask, render_template, request, jsonify
+import mysql.connector
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+import google.generativeai as genai
+# from datetime import datetime
 
-# Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
 
-# Configure Google Generative AI with your API key
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+# Database configuration
+db_config = {
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'prompt_engineer')
+}
 
-# Optional: Print available models that support generateContent
-# print("\n--- Available Gemini Models ---")
-# for m in genai.list_models():
-#     if "generateContent" in m.supported_generation_methods:
-#         print(f"Model Name: {m.name}, Display Name: {m.display_name}")
-# print("-----------------------------\n")
+# Initialize Gemini
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel('gemini-pro')
 
-# Use a currently supported model name
-model = genai.GenerativeModel('gemini-2.0-flash')  # Or 'gemini-1.5-pro', 'gemini-2.0-flash', etc.
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            role ENUM('user', 'assistant') NOT NULL,
+            content TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            prompt_fields JSON
+        )
+    ''')
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+init_db()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return app.send_static_file('index.html')
+
+@app.route('/history')
+def get_history():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT role, content FROM chat_history ORDER BY created_at ASC')
+    history = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(history)
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -33,49 +63,48 @@ def chat():
     expanded_fields = data.get('expandedFields', {})
 
     # Construct the final prompt
-    full_prompt_parts = []
+    prompt_parts = []
     if main_prompt:
-        full_prompt_parts.append(f"Task: {main_prompt}")
-
-    # Define the order of expanded fields
-    field_order = [
-        'topic', 'context', 'tone', 'targetAudience', 'format',
-        'role', 'keywords', 'positiveKeywords', 'negativeConstraints', 'length'
-    ]
-
-    for field_name in field_order:
-        label = ''
-        # Map camelCase keys to human-readable labels for the prompt
-        if field_name == 'topic': label = 'Topic'
-        elif field_name == 'context': label = 'Context/Examples'
-        elif field_name == 'tone': label = 'Tone/Style'
-        elif field_name == 'targetAudience': label = 'Target Audience'
-        elif field_name == 'format': label = 'Format'
-        elif field_name == 'role': label = 'Role'
-        elif field_name == 'keywords': label = 'Keywords'
-        elif field_name == 'positiveKeywords': label = 'Positive/Key Words'
-        elif field_name == 'negativeConstraints': label = 'Negative/Constraints'
-        elif field_name == 'length': label = 'Length'
-
-        value = expanded_fields.get(field_name)
+        prompt_parts.append(f"Main Prompt: {main_prompt}")
+    
+    for field, value in expanded_fields.items():
         if value:
-            full_prompt_parts.append(f"• {label}: {value}")
-
-    final_prompt = " ".join(full_prompt_parts).strip()
+            prompt_parts.append(f"{field}: {value}")
+    
+    final_prompt = "\n".join(prompt_parts)
 
     if not final_prompt:
-        return jsonify({'response': 'Please enter a prompt or fill in some fields.'})
+        return jsonify({'response': 'Please provide a prompt'}), 400
+
+    # Save user message to DB
+    import json
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        'INSERT INTO chat_history (role, content, prompt_fields) VALUES (%s, %s, %s)',
+        ('user', final_prompt, json.dumps(expanded_fields))
+    )
+    conn.commit()
 
     try:
-        # Generate content using the Gemini model
-        # You might want to add error handling or adjust generation parameters here
+        # Get Gemini response
         response = model.generate_content(final_prompt)
-        # Access the text from the response object
-        generated_text = response.text
-        return jsonify({'response': generated_text})
+        bot_response = response.text if hasattr(response, 'text') else str(response)
+        # Save bot response to DB
+        cursor.execute(
+            'INSERT INTO chat_history (role, content, prompt_fields) VALUES (%s, %s, %s)',
+            ('assistant', bot_response, None)
+        )
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'response': bot_response})
     except Exception as e:
-        print(f"Error generating content: {e}")
-        return jsonify({'response': 'An error occurred while generating the response. Please try again.'}), 500
+        cursor.close()
+        conn.close()
+        return jsonify({'response': f'Error: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True) # debug=True allows for automatic reloading on code changes
+    app.run(debug=True)
